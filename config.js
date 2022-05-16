@@ -8,4 +8,12 @@ module.exports = {
 
 Authorization: Basic <base64(USERNAME:PASSWORD)>
 
+To get use either of:
+
+https://infura-ipfs.io/ipfs/QmbMe9AzNEKbbMnKSZxMJm259jpnxgbMZV4d2vut2q5NLi
+
+or
+
+https://ipfs.infura.io/ipfs/QmbMe9AzNEKbbMnKSZxMJm259jpnxgbMZV4d2vut2q5NLi
+
 */

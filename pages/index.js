@@ -17,6 +17,8 @@ export default function Home() {
 
 
   useEffect(()=>{
+    setLoading(true)
+    loadNFT()
   }, [])
   
 
@@ -71,12 +73,10 @@ export default function Home() {
 
   if(!loading && !nfts.length){
     return (
-      <div>
-        <p>
+      <div className='h-28 py-10'>
+        <p className='text-center'>
           There are presently no NFTs for Sale
         </p>
-        <button onClick={loadNFT} >Load Market</button>
-        <button onClick={buyNFT} >Buy NFT</button>
       </div>
     )
   }
