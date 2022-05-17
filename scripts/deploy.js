@@ -4,6 +4,8 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const { ethers } = require("hardhat");
+const fs = require('fs')
+const path = require('path')
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -26,6 +28,14 @@ async function main() {
   await contract.deployed()
 
   console.log("Marketplace Contract has been deployed to: \n", contract.address)
+  fs.writeFileSync(path.resolve(__dirname, '../config.js'), `
+      module.exports = {
+        contractAddress: ${contract.address},
+        ipfsInfuraId: "29FLjpPP09BaPOk3eefbPjEin04",
+        ipfsInfuraSecret: "a12fddffca353429eb0375157d997c50",
+      }
+  `)
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere

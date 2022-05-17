@@ -88,7 +88,7 @@ export default function CreateNFT(){
                     onChange={updateState}
                 />
                 <input
-                    placeholder='Asset Price'
+                    placeholder='Asset Price in ETH'
                     className="mt-2 border rounded p-4"
                     type='number'
                     defaultValue={1}

@@ -22,9 +22,13 @@ module.exports = {
     hardhat: {
       chainId: 1337
     },
-    // mumbai: {
-    //   url: "",
-    //   accounts: []
+    mumbai: {
+      url: "https://matic-mumbai.chainstacklabs.com",
+      accounts: [process.env.PRIVATE_KEY]
+    },
+    // matic: {
+    //   url: "https://rpc-mumbai.maticvigil.com",
+    //   accounts: [process.env.PRIVATE_KEY]
     // }
   },
   solidity: {
