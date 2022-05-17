@@ -19,25 +19,30 @@ export default function MyNFT(){
 
     async function fetchMyNFT(){
         if(typeof window.ethereum != 'undefined'){
+            await window.ethereum.request({method: 'eth_requestAccounts'})
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const signer = provider.getSigner()
             const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer)
 
-            const myNFTs = await (await contract.fetchMyNFTs()).map(async nft => {
-                const tokenURI = await contract.tokenURI(nft.tokenId)
-                const tokenMeta = (await axios.get(tokenURI)).data
-                const price = ethers.utils.formatUnits(tokenMeta.price, 'ether')
-                return {
-                    tokenId: nft.tokenId,
-                    name: tokenMeta.name,
-                    description: tokenMeta.description,
-                    url: tokenMeta.url,
-                    price
-                }
-            })
-
-            setNft(myNFTs)
-            setLoading(false)
+            try{
+                const myNFTs = await (await contract.fetchMyNFTs()).map(async nft => {
+                    const tokenURI = await contract.tokenURI(nft.tokenId)
+                    const tokenMeta = (await axios.get(tokenURI)).data
+                    const price = ethers.utils.formatUnits(tokenMeta.price, 'ether')
+                    return {
+                        tokenId: nft.tokenId,
+                        name: tokenMeta.name,
+                        description: tokenMeta.description,
+                        url: tokenMeta.url,
+                        price
+                    }
+                })
+    
+                setNft(myNFTs)
+                setLoading(false)
+            }catch(e){
+                console.log(e.message)
+            }
         }
     }
 

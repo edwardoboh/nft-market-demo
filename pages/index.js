@@ -66,9 +66,13 @@ export default function Home() {
 
     const amount = ethers.utils.parseUnits(nft.price, "ether")
 
-    const transaction = await contract.createMarketSale(nft.tokenId, { value: amount })
-    await transaction.wait()
-    await loadNFT()
+    try{
+      const transaction = await contract.createMarketSale(nft.tokenId, { value: amount })
+      await transaction.wait()
+      await loadNFT()
+    }catch(e){
+      console.log(e.message)
+    }
   }
 
   if(!loading && !nfts.length){

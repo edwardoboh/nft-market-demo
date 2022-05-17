@@ -30,7 +30,7 @@ async function main() {
   console.log("Marketplace Contract has been deployed to: \n", contract.address)
   fs.writeFileSync(path.resolve(__dirname, '../config.js'), `
       module.exports = {
-        contractAddress: ${contract.address},
+        contractAddress: "${contract.address}",
         ipfsInfuraId: "29FLjpPP09BaPOk3eefbPjEin04",
         ipfsInfuraSecret: "a12fddffca353429eb0375157d997c50",
       }

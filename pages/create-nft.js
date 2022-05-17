@@ -34,14 +34,18 @@ export default function CreateNFT(){
         if(!file || !name || !description) return;
 
         // First upload image to IPFS
-        const newUpload = await client.add(
-            file,
-            {
-                progress: (prog) => {console.log("Received: ", prog)}
-            }
-        )
-        const returnURL = `https://ipfs.infura.io/ipfs/${newUpload.path}`
-        setAssetURI(returnURL)
+        try{
+            const newUpload = await client.add(
+                file,
+                {
+                    progress: (prog) => {console.log("Received: ", prog)}
+                }
+            )
+            const returnURL = `https://ipfs.infura.io/ipfs/${newUpload.path}`
+            setAssetURI(returnURL)
+        }catch(e){
+            console.log(e.message)
+        }
 
         // Now upload image meta data to IPFS
         const metadata = JSON.stringify({
@@ -63,12 +67,17 @@ export default function CreateNFT(){
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const signer = provider.getSigner()
             const contract = new ethers.Contract(contractAddress, MarketPlace, signer)
-            const listingFee = await contract.getListingFee()
-            const assetPrice = ethers.utils.parseUnits(formData.price.toString(), 'ether')
 
-            const transaction = await contract.createToken(completeAssetURI, assetPrice, { value: listingFee })
-            await transaction.wait()
-            router.push('/my-nft')
+            try{
+                const listingFee = await contract.getListingFee()
+                const assetPrice = ethers.utils.parseUnits(formData.price.toString(), 'ether')
+    
+                const transaction = await contract.createToken(completeAssetURI, assetPrice, { value: listingFee })
+                await transaction.wait()
+                router.push('/my-nft')
+            }catch(e){
+                console.log(e.message)
+            }
         }
     }
 

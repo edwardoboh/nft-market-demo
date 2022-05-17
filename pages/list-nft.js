@@ -32,13 +32,17 @@ export default function ResellMyNFT(){
             const signer = provider.getSigner()
             const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer)
 
-            const listingFee = await contract.getListingFee()
-            const sellingPrice = ethers.utils.parseUnits(price.toString(), 'ether')
-
-            const transaction = await contract.resellToken(id, sellingPrice, { value: listingFee })
-            await transaction.wait()
-
-            router.push('/')
+            try{
+                const listingFee = await contract.getListingFee()
+                const sellingPrice = ethers.utils.parseUnits(price.toString(), 'ether')
+    
+                const transaction = await contract.resellToken(id, sellingPrice, { value: listingFee })
+                await transaction.wait()
+    
+                router.push('/')
+            }catch(e){
+                console.log(e.message)
+            }
         }
     }
     return(
