@@ -83,8 +83,18 @@ describe("NFT MarketPlace Contract", function(){
 
       it("Should be able to list out all listed Tokens", async function(){
         const allTokens = await marketPlace
+        .connect(addressWithSigner)
         .fetchMarketItems()
+        console.log()
         expect(allTokens.length).to.equal(2);
+      })
+
+      it("Should provide a list of a user's listed Tokens", async function(){
+        const allTokens = await marketPlace
+        .connect(addressWithSigner)
+        .fetchListedItems()
+        console.log(allTokens)
+        expect(allTokens.length).to.equal(1);
       })
     })
 

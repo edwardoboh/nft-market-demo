@@ -159,12 +159,18 @@ contract NFTMarketplace is ERC721URIStorage {
 
     function fetchMyNFTs() public view returns (MarketItems[] memory) {
         uint256 _myItemsCount;
-        MarketItems[] memory allItems;
-
         for (uint256 i; i < _tokenIds.current(); i++) {
             if (allMarketItems[i + 1].owner == payable(msg.sender)) {
-                allItems[_myItemsCount] = allMarketItems[i + 1];
                 _myItemsCount++;
+            }
+        }
+
+        MarketItems[] memory allItems = new MarketItems[](_myItemsCount);
+        uint256 _countPivot;
+        for (uint256 i; i < _tokenIds.current(); i++) {
+            if (allMarketItems[i + 1].owner == payable(msg.sender)) {
+                allItems[_countPivot] = allMarketItems[i + 1];
+                _countPivot++;
             }
         }
 
@@ -173,12 +179,18 @@ contract NFTMarketplace is ERC721URIStorage {
 
     function fetchListedItems() public view returns (MarketItems[] memory) {
         uint256 _myItemsCount;
-        MarketItems[] memory allItems;
-
         for (uint256 i; i < _tokenIds.current(); i++) {
             if (allMarketItems[i + 1].seller == payable(msg.sender)) {
-                allItems[_myItemsCount] = allMarketItems[i + 1];
                 _myItemsCount++;
+            }
+        }
+
+        MarketItems[] memory allItems = new MarketItems[](_myItemsCount);
+        uint256 _countPivot;
+        for (uint256 i; i < _tokenIds.current(); i++) {
+            if (allMarketItems[i + 1].seller == payable(msg.sender)) {
+                allItems[_countPivot] = allMarketItems[i + 1];
+                _countPivot++;
             }
         }
 

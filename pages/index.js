@@ -16,6 +16,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
 
 
+  useEffect(() => {
+
+  }, [nfts])
+
   useEffect(()=>{
     setLoading(true)
     loadNFT()
@@ -27,7 +31,7 @@ export default function Home() {
   }
 
   async function loadNFT(){
-    console.log(contractAddress)
+    
     await getAddresses()
     if(typeof window.ethereum == 'undefined') return;
     const provider = new ethers.providers.JsonRpcProvider()
@@ -35,22 +39,23 @@ export default function Home() {
 
     try{
     const listings = await contract.fetchMarketItems()
-    const allTokens = await listings.map(async token => {
+    const allTokens = listings.map(async token => {
       const tokenURI = await contract.tokenURI(token.tokenId)
-      const price = ethers.utils.formatUnits(token.price, "ether")
+      const price = ethers.utils.formatUnits(`${token.price}`, "ether")
       const metadata = await axios.get(tokenURI)
-      const {name, desription, image} = metadata.data 
+      const {name, description, url} = metadata.data 
       return {
+        tokenId: token.tokenId,
         tokenURI,
         owner: token.owner,
         seller: token.seller,
         sold: token.sold,
-        price, name, desription, image,
+        price, name, description, url,
       }
     });
     
-    console.log(allTokens)
-    setNfts(allTokens);
+    const resolvedTokens = await Promise.all(allTokens)
+    setNfts(resolvedTokens);
     setLoading(false);
     }catch(e){
       console.log(e.message)
@@ -64,14 +69,16 @@ export default function Home() {
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer);
 
-    const amount = ethers.utils.parseUnits(nft.price, "ether")
+    console.log("NFT: ", nft)
+    const amount = ethers.utils.parseUnits(`${nft.price}`, "ether")
+    console.log("amount: ", amount)
 
     try{
       const transaction = await contract.createMarketSale(nft.tokenId, { value: amount })
       await transaction.wait()
       await loadNFT()
     }catch(e){
-      console.log(e.message)
+      console.log(e.stack)
     }
   }
 
@@ -92,7 +99,7 @@ export default function Home() {
           {
             nfts && nfts.map((nft, i) => (
               <div key={i} className="border shadow rounded-xl overflow-hidden">
-                <img src={nft.image} />
+                <img src={nft.url} />
                 <div className="p-4">
                   <p style={{ height: '64px' }} className="text-2xl font-semibold">{nft.name}</p>
                   <div style={{ height: '70px', overflow: 'hidden' }}>

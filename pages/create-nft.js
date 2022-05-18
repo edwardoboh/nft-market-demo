@@ -18,7 +18,7 @@ const client = ipfsClient({
 export default function CreateNFT(){
 
     const [formData, setFormData] = useState({
-        price: null, name: null, description: null,
+        price: 1, name: null, description: null,
     })
     const [assetURI, setAssetURI] = useState()
     const [file, setFile] = useState()
@@ -26,12 +26,16 @@ export default function CreateNFT(){
     const router = useRouter()
 
     function updateState(e){
+
         setFormData({...formData, [e.target.name]: e.target.value})
     }
 
     async function uploadToIPFS(){
-        const {name, description} = formData
-        if(!file || !name || !description) return;
+        const {name, description, price} = formData
+        if(!file || !name || !description || !price){
+            alert("You must enter a Name, Decription and Price")
+           return;
+        }
 
         // First upload image to IPFS
         try{
@@ -43,34 +47,37 @@ export default function CreateNFT(){
             )
             const returnURL = `https://ipfs.infura.io/ipfs/${newUpload.path}`
             setAssetURI(returnURL)
+
+            // Now upload image meta data to IPFS
+            const metadata = JSON.stringify({
+                name,
+                description,
+                url: returnURL
+            })
+            const metadataURI = await client.add(metadata)
+            
+            // Now call smart contract and perform action
+            const completeURI = `https://ipfs.infura.io/ipfs/${metadataURI.path}`
+            console.log("Asset URI: ", completeURI);
+            await createNewNFT(completeURI)
         }catch(e){
             console.log(e.message)
         }
-
-        // Now upload image meta data to IPFS
-        const metadata = JSON.stringify({
-            name,
-            description,
-            url: returnURL
-        })
-        const completeURI = await client.add(metadata)
-        console.log("Asset URI: ", completeURI);
-
-        // Now call smart contract and perform action
-        await createNewNFT(completeURI)
     }
 
 
     async function createNewNFT(completeAssetURI){
-        await window.ethereum.request({method: 'eth_getAccounts'})
+        await window.ethereum.request({method: 'eth_requestAccounts'})
         if(typeof window.ethereum != 'undefined'){
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const signer = provider.getSigner()
-            const contract = new ethers.Contract(contractAddress, MarketPlace, signer)
+            const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer)
 
             try{
+                console.log(formData.price)
                 const listingFee = await contract.getListingFee()
-                const assetPrice = ethers.utils.parseUnits(formData.price.toString(), 'ether')
+                const assetPrice = ethers.utils.parseUnits(`${formData.price}`, 'ether')
+                console.log(assetPrice)
     
                 const transaction = await contract.createToken(completeAssetURI, assetPrice, { value: listingFee })
                 await transaction.wait()
@@ -100,6 +107,7 @@ export default function CreateNFT(){
                     placeholder='Asset Price in ETH'
                     className="mt-2 border rounded p-4"
                     type='number'
+                    name='price'
                     defaultValue={1}
                     onChange={updateState}
                 />

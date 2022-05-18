@@ -25,20 +25,22 @@ export default function MyNFT(){
             const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer)
 
             try{
-                const myNFTs = await (await contract.fetchMyNFTs()).map(async nft => {
+                const nftFetch = await contract.fetchMyNFTs();
+                const myNFTs = nftFetch.map(async nft => {
                     const tokenURI = await contract.tokenURI(nft.tokenId)
                     const tokenMeta = (await axios.get(tokenURI)).data
-                    const price = ethers.utils.formatUnits(tokenMeta.price, 'ether')
+                    // const price = ethers.utils.formatUnits(tokenMeta.price, 'ether')
                     return {
                         tokenId: nft.tokenId,
                         name: tokenMeta.name,
                         description: tokenMeta.description,
                         url: tokenMeta.url,
-                        price
+                        price: tokenMeta.price,
                     }
                 })
     
-                setNft(myNFTs)
+                const resolvedNFTs = await Promise.all(myNFTs)
+                setNft(resolvedNFTs)
                 setLoading(false)
             }catch(e){
                 console.log(e.message)

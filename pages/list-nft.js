@@ -27,14 +27,14 @@ export default function ResellMyNFT(){
     async function resellNft(){
         if(typeof window.ethereum != 'undefined'){
             if(!price) return;
-            await window.ethereum.request({method: 'eth_getAddresses'})
+            await window.ethereum.request({method: 'eth_requestAccounts'})
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const signer = provider.getSigner()
             const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer)
 
             try{
                 const listingFee = await contract.getListingFee()
-                const sellingPrice = ethers.utils.parseUnits(price.toString(), 'ether')
+                const sellingPrice = ethers.utils.parseUnits(`${price}`, 'ether')
     
                 const transaction = await contract.resellToken(id, sellingPrice, { value: listingFee })
                 await transaction.wait()

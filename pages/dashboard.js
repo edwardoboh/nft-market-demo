@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import MarketPlace from '../artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json'
 import { contractAddress } from '../config'
 import axios from 'axios'
-import Web3Modal from 'web3modal'
+
 export default function Dashboard(){
     const [nft, setNft] = useState([])
     const [loading, setLoading] = useState(false)
@@ -14,22 +14,21 @@ export default function Dashboard(){
     }, [])
 
     async function fetchMyListedNFT(){
-        console.log("window.ethereum: ", window.ethereum)
         if(typeof window.ethereum != 'undefined'){
-            const web3Modal = new Web3Modal()
-            const connection = await web3Modal.connect()
-            const provider = new ethers.providers.Web3Provider(connection)
-
-            // const provider = new ethers.providers.Web3Provider(window.ethereum)
+            await window.ethereum.request({method: "eth_requestAccounts"})
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
             const signer = provider.getSigner()
             const contract = new ethers.Contract(contractAddress, MarketPlace.abi, signer)
             
             try{
                 const listedMyItems = await contract.fetchListedItems()
-                const myNFTs = listedMyItems.map(async nft => {
+                const myNFTs = await listedMyItems.map(async nft => {
                     const tokenURI = await contract.tokenURI(nft.tokenId)
-                    const tokenMeta = (await axios.get(tokenURI)).data
-                    const price = ethers.utils.formatUnits(tokenMeta.price, 'ether')
+                    const tokenMetaResponse = await axios.get(tokenURI)
+                    const tokenMeta = tokenMetaResponse.data
+                    console.log("META: ", tokenMeta)
+
+                    const price = ethers.utils.formatUnits(nft.price, 'ether')
                     return {
                         tokenId: nft.tokenId,
                         name: tokenMeta.name,
@@ -39,10 +38,12 @@ export default function Dashboard(){
                     }
                 })
 
-                setNft(myNFTs)
+                const resolvedNFTs = await Promise.all(myNFTs)
+                setNft(resolvedNFTs)
                 setLoading(false)
             }catch(e){
                 console.log(e.message)
+                console.log(e.stack)
             }
         }
     }
@@ -64,6 +65,7 @@ export default function Dashboard(){
                 <div key={i} className="border shadow rounded-xl overflow-hidden">
                     <img src={nft.url} className="rounded" />
                     <div className="p-4 bg-black">
+                    <p className="text-1xl text-white">{nft.name}</p>
                     <p className="text-2xl font-bold text-white">Price - {nft.price} Eth</p>
                     <button className="mt-4 w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={() => listNFT(nft)}>List</button>
                     </div>
